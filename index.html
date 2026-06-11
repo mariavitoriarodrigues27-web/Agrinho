@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgroTech São José - OS</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <div class="ticker-container">
+        <div class="ticker-wrapper" id="quotes-ticker">
+            Sincronizando com as bolsas mundiais...
+        </div>
+    </div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">🌱</div>
+                <div>
+                    <h2>AgroTech SJP</h2>
+                    <span>Enterprise OS</span>
+                </div>
+            </div>
+            
+            <nav class="menu">
+                <span class="menu-category">PRODUÇÃO E ANÁLISE</span>
+                <button class="menu-btn active" data-tab="dashboard">📊 Painel Geral</button>
+                <button class="menu-btn" data-tab="agricultura">🌾 Lavouras & Solo</button>
+                <button class="menu-btn" data-tab="pecuaria">🐄 Gestão de Rebanho</button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p>Status do Servidor: <span class="status-online">● Online</span></p>
+                
+                <div class="student-credits">
+                    <p class="student-name">Membro Técnico:</p>
+                    <strong>MARIA VITORIA RODRIGUES</strong>
+                    <p>Turma: 2B</p>
+                    <p class="school-name">Colégio Estadual do Campo Irmã Ambrósia Sabatovich</p>
+                    <p class="school-location">Colônia Marcelino</p>
+                    <p class="school-location">São José dos Pinhais - PR</p>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <section id="dashboard" class="tab-content active">
+                <div class="content-header">
+                    <div>
+                        <h1>Dashboard Executivo</h1>
+                        <p class="subtitle">Indicadores macroeconômicos e dados em tempo real da safra brasileira</p>
+                    </div>
+                    <div class="date-badge" id="current-date">--/--/----</div>
+                </div>
+
+                <div class="grid-cards">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span>ÁREA PRODUTIVA</span>
+                            <span class="kpi-icon">🗺️</span>
+                        </div>
+                        <p class="kpi-value">2.450 <small>ha</small></p>
+                        <span class="kpi-trend up">↑ 4.2% este ano</span>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span>REBANHO ATIVO</span>
+                            <span class="kpi-icon">🐂</span>
+                        </div>
+                        <p class="kpi-value" id="total-cattle-kpi">0</p>
+                        <span class="kpi-trend stability">Acompanhamento local</span>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span>CÂMBIO COMERCIAL</span>
+                            <span class="kpi-icon">💵</span>
+                        </div>
+                        <p class="kpi-value" id="kpi-dolar">R$ 0,00</p>
+                        <span class="kpi-trend" id="kpi-dolar-trend">Atualizando...</span>
+                    </div>
+                </div>
+
+                <div class="grid-two-columns">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <h3>Evolução da Safra Nacional (IBGE SIDRA)</h3>
+                            <p>Dados coletados em tempo real diretamente do banco do governo federal</p>
+                        </div>
+                        <div class="canvas-wrapper">
+                            <canvas id="prodChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card-form flex-column">
+                        <h3>Monitoramento Climático - Polo Agro</h3>
+                        <div class="weather-box" id="weather-display">
+                            <div class="weather-main">
+                                <span class="weather-temp">28°C</span>
+                                <span class="weather-city">São José dos Pinhais</span>
+                            </div>
+                            <p class="weather-desc">Condições climáticas reais para manejo de lavoura</p>
+                        </div>
+                        <div class="log-panel">
+                            <h4>Histórico de Ações do Sistema</h4>
+                            <ul id="log-list">
+                                <li>[Sistema] AgroTech São José inicializado com sucesso.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="agricultura" class="tab-content">
+                <div class="content-header">
+                    <div>
+                        <h1>Engenharia de Solos</h1>
+                        <p class="subtitle">Correção química de precisão pelo método de Saturação por Bases (EMBRAPA)</p>
+                    </div>
+                </div>
+
+                <div class="card-form max-width-md">
+                    <h3>Cálculo Técnico de Calagem</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>CTC Total do Solo (T):</label>
+                            <input type="number" id="ctc" value="8.5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>Saturação Atual (V1 %):</label>
+                            <input type="number" id="v1" value="40">
+                        </div>
+                        <div class="form-group">
+                            <label>Saturação Desejada (V2 %):</label>
+                            <input type="number" id="v2" value="70">
+                        </div>
+                        <div class="form-group">
+                            <label>PRNT do Calcário (%):</label>
+                            <input type="number" id="prnt" value="80">
+                        </div>
+                    </div>
+                    <button class="btn-action" id="btn-calcular">Processar Diagnóstico Agronômico</button>
+                    <div class="result-box hidden" id="resultado-calagem"></div>
+                </div>
+            </section>
+
+            <section id="pecuaria" class="tab-content">
+                <div class="content-header">
+                    <div>
+                        <h1>Gestão de Rebanho Inteligente</h1>
+                        <p class="subtitle">Controle patrimonial de animais com persistência de dados local</p>
+                    </div>
+                    <button class="btn-secondary" id="btn-exportar">📥 Exportar CSV do Rebanho</button>
+                </div>
+
+                <div class="grid-two-columns">
+                    <div class="card-form">
+                        <h3>Registrar Entrada de Animal</h3>
+                        <div class="form-group">
+                            <label>Brinco de Identificação:</label>
+                            <input type="text" id="animal-id" placeholder="Ex: BR-9981">
+                        </div>
+                        <div class="form-group">
+                            <label>Variedade / Raça:</label>
+                            <select id="animal-breed">
+                                <option value="Nelore">Nelore P.O.</option>
+                                <option value="Angus">Aberdeen Angus</option>
+                                <option value="Holandês">Holandês (Leiteiro)</option>
+                                <option value="Senepol">Senepol</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Peso Corporal (kg):</label>
+                            <input type="number" id="animal-weight" placeholder="Ex: 510">
+                        </div>
+                        <button class="btn-action" id="btn-add-animal">Salvar Registro no Banco</button>
+                    </div>
+
+                    <div class="card-form">
+                        <h3>Inventário de Gado Ativo</h3>
+                        <div class="table-wrapper">
+                            <table class="table-agro">
+                                <thead>
+                                    <tr>
+                                        <th>Identificador</th>
+                                        <th>Raça</th>
+                                        <th>Massa Médio</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cattle-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
