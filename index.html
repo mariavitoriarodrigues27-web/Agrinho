@@ -9,9 +9,16 @@
 </head>
 <body>
 
-    <div class="ticker-container">
-        <div class="ticker-wrapper" id="quotes-ticker">
-            Sincronizando com as bolsas mundiais...
+    <div class="top-bar">
+        <div class="ticker-container">
+            <div class="ticker-wrapper" id="quotes-ticker">
+                Sincronizando com as bolsas mundiais...
+            </div>
+        </div>
+        <div class="accessibility-bar">
+            <button class="btn-acc" id="btn-tts" title="Ler em Voz Alta">🔊 Ouvir Página</button>
+            <button class="btn-acc" id="btn-zoom-in" title="Aumentar Texto">A+</button>
+            <button class="btn-acc" id="btn-zoom-out" title="Diminuir Texto">A-</button>
         </div>
     </div>
 
@@ -33,7 +40,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <p>Status do Servidor: <span class="status-online">● Online</span></p>
+                <p>Status: <span class="status-online">● Online</span></p>
                 
                 <div class="student-credits">
                     <p class="student-name">Membro Técnico:</p>
@@ -46,7 +53,7 @@
             </div>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content" id="accessible-content">
             
             <section id="dashboard" class="tab-content active">
                 <div class="content-header">
@@ -59,26 +66,17 @@
 
                 <div class="grid-cards">
                     <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span>ÁREA PRODUTIVA</span>
-                            <span class="kpi-icon">🗺️</span>
-                        </div>
+                        <div class="kpi-header"><span>ÁREA PRODUTIVA</span><span class="kpi-icon">🗺️</span></div>
                         <p class="kpi-value">2.450 <small>ha</small></p>
                         <span class="kpi-trend up">↑ 4.2% este ano</span>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span>REBANHO ATIVO</span>
-                            <span class="kpi-icon">🐂</span>
-                        </div>
+                        <div class="kpi-header"><span>REBANHO ATIVO</span><span class="kpi-icon">🐂</span></div>
                         <p class="kpi-value" id="total-cattle-kpi">0</p>
                         <span class="kpi-trend stability">Acompanhamento local</span>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span>CÂMBIO COMERCIAL</span>
-                            <span class="kpi-icon">💵</span>
-                        </div>
+                        <div class="kpi-header"><span>CÂMBIO COMERCIAL</span><span class="kpi-icon">💵</span></div>
                         <p class="kpi-value" id="kpi-dolar">R$ 0,00</p>
                         <span class="kpi-trend" id="kpi-dolar-trend">Atualizando...</span>
                     </div>
@@ -187,7 +185,7 @@
                                     <tr>
                                         <th>Identificador</th>
                                         <th>Raça</th>
-                                        <th>Massa Médio</th>
+                                        <th>Massa Média</th>
                                         <th>Status</th>
                                         <th>Ações</th>
                                     </tr>

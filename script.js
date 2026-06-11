@@ -1,5 +1,5 @@
-// BANCO DE DADOS LOCAL (Inicia totalmente limpo e vazio para você cadastrar)
 let rebanho = JSON.parse(localStorage.getItem('AGRO_TECH_SJP_REBANHO')) || [];
+let currentFontSize = 16; // Tamanho base em pixels
 
 document.addEventListener("DOMContentLoaded", () => {
     configurarNavegacao();
@@ -8,27 +8,74 @@ document.addEventListener("DOMContentLoaded", () => {
     initChartIBGE();
     renderRebanho();
     atualizarClimaFakeReal();
+    configurarAcessibilidade(); // Liga os novos recursos
 
-    // Vinculação de Operações do Sistema
+    // Vinculação de Operações
     document.getElementById('btn-calcular').addEventListener('click', calcularCalagem);
     document.getElementById('btn-add-animal').addEventListener('click', adicionarAnimal);
     document.getElementById('btn-exportar').addEventListener('click', exportarParaCSV);
 });
 
-// Logs do Sistema
-function addLog(mensagem) {
-    const lista = document.getElementById('log-list');
-    const item = document.createElement('li');
-    item.innerText = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
-    lista.prepend(item);
+// MOTOR DE ACESSIBILIDADE (Zoom e Leitura em Voz Alta)
+function configurarAcessibilidade() {
+    // Zoom In (Aumentar)
+    document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        if (currentFontSize < 24) {
+            currentFontSize += 2;
+            document.documentElement.style.setProperty('--base-font-size', `${currentFontSize}px`);
+            addLog("Tamanho do texto aumentado.");
+        }
+    });
+
+    // Zoom Out (Diminuir)
+    document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        if (currentFontSize > 12) {
+            currentFontSize -= 2;
+            document.documentElement.style.setProperty('--base-font-size', `${currentFontSize}px`);
+            addLog("Tamanho do texto reduzido.");
+        }
+    });
+
+    // Leituras de Tela (Text-to-Speech)
+    const btnTts = document.getElementById('btn-tts');
+    btnTts.addEventListener('click', () => {
+        // Se já estiver lendo, cancela a voz
+        if (window.speechSynthesis.speaking) {
+            window.speechSynthesis.cancel();
+            btnTts.innerText = "🔊 Ouvir Página";
+            addLog("Leitura de voz interrompida.");
+            return;
+        }
+
+        // Pega o texto limpo apenas da aba que está visível na tela
+        const abaAtiva = document.querySelector('.tab-content.active');
+        if (!abaAtiva) return;
+
+        const textoParaLer = abaAtiva.innerText;
+        const sotaqueUnico = new SpeechSynthesisUtterance(textoParaLer);
+        sotaqueUnico.lang = 'pt-BR'; // Define a voz para português do Brasil
+
+        sotaqueUnico.onend = () => { btnTts.innerText = "🔊 Ouvir Página"; };
+
+        window.speechSynthesis.speak(sotaqueUnico);
+        btnTts.innerText = "🛑 Parar Leitura";
+        addLog("Iniciou leitura de tela em voz alta.");
+    });
 }
 
-// Persistência de dados
+function addLog(mensagem) {
+    const lista = document.getElementById('log-list');
+    if(lista) {
+        const item = document.createElement('li');
+        item.innerText = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
+        lista.prepend(item);
+    }
+}
+
 function salvarDados() {
     localStorage.setItem('AGRO_TECH_SJP_REBANHO', JSON.stringify(rebanho));
 }
 
-// Controle de Navegação de Abas
 function configurarNavegacao() {
     const botoes = document.querySelectorAll('.menu-btn');
     const abas = document.querySelectorAll('.tab-content');
@@ -43,6 +90,7 @@ function configurarNavegacao() {
             const abaAlvo = document.getElementById(alvoTab);
             if (abaAlvo) {
                 abaAlvo.classList.add('active');
+                if (window.speechSynthesis.speaking) window.speechSynthesis.cancel(); // Para a voz se trocar de aba
                 addLog(`Módulo AgroTech: ${alvoTab.toUpperCase()}`);
             }
         });
@@ -54,39 +102,30 @@ function renderDate() {
     document.getElementById('current-date').innerText = new Date().toLocaleDateString('pt-BR', options);
 }
 
-// COTAÇÃO FINANCEIRA EM TEMPO REAL
 async function buscarMercadoReal() {
     const ticker = document.getElementById('quotes-ticker');
     try {
         const response = await fetch('https://economia.awesomeapi.com.br/last/USD-BRL,EUR-BRL');
         const dados = await response.json();
-        
         const usd = dados.USDBRL;
         const trendIcon = parseFloat(usd.pctChange) >= 0 ? "↑" : "↓";
 
-        // Atualiza os Tickers de Cotação
         ticker.innerHTML = `
-            <span style="margin-right: 50px;">💵 <strong>DÓLAR COMERCIAL:</strong> R$ ${parseFloat(usd.bid).toFixed(2)} (${usd.pctChange}%)</span>
+            <span style="margin-right: 50px;">💵 <strong>DÓLAR:</strong> R$ ${parseFloat(usd.bid).toFixed(2)} (${usd.pctChange}%)</span>
             <span style="margin-right: 50px;">🇪🇺 <strong>EURO:</strong> R$ ${parseFloat(dados.EURBRL.bid).toFixed(2)}</span>
-            <span style="margin-right: 50px;">🌾 <strong>AGROTECH SÃO JOSÉ:</strong> Conectado com o mercado financeiro em tempo real.</span>
         `;
 
-        // Atualiza KPI na Dashboard Principal
         document.getElementById('kpi-dolar').innerText = `R$ ${parseFloat(usd.bid).toFixed(2)}`;
         const trendEl = document.getElementById('kpi-dolar-trend');
         trendEl.innerText = `${trendIcon} Var: ${usd.pctChange}%`;
         trendEl.className = `kpi-trend ${parseFloat(usd.pctChange) >= 0 ? 'up' : 'down'}`;
-        
-        addLog("Mercados financeiros atualizados.");
     } catch (error) {
-        ticker.innerHTML = "Falha na conexão com servidores de câmbio.";
+        ticker.innerHTML = "Falha de conexão com os mercados.";
     }
 }
 
-// GRÁFICO HISTÓRICO CONECTADO DIRETAMENTE AO IBGE (SIDRA)
 async function initChartIBGE() {
     const ctx = document.getElementById('prodChart').getContext('2d');
-    
     const agroChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -116,20 +155,14 @@ async function initChartIBGE() {
         const response = await fetch("https://servicodados.ibge.gov.br/api/v3/agregados/1612/periodos/2019|2020|2021|2022|2023|2024/variaveis/214?localidades=N1[all]&classificacao=31[39438]");
         const dados = await response.json();
         const serieTemporal = dados[0].resultados[0].series[0].serie;
-        
         const valoresProducao = Object.values(serieTemporal).map(valor => parseFloat(valor) / 1000000); 
-        const anos = Object.keys(serieTemporal);
-
-        agroChart.data.labels = anos;
         agroChart.data.datasets[0].data = valoresProducao;
         agroChart.update();
-        addLog("Gráfico alimentado via API oficial do IBGE.");
     } catch (e) {
-        addLog("Servidor do IBGE instável. Rodando dados locais em cache.");
+        console.log("Erro na API do IBGE.");
     }
 }
 
-// CÁLCULO DE CALAGEM OFICIAL (MÉTODO EMBRAPA)
 function calcularCalagem() {
     const ctc = parseFloat(document.getElementById('ctc').value);
     const v1 = parseFloat(document.getElementById('v1').value);
@@ -138,22 +171,19 @@ function calcularCalagem() {
     const resultadoBox = document.getElementById('resultado-calagem');
 
     if (v2 <= v1) {
-        resultadoBox.innerHTML = "⚠️ <strong>Erro Operacional:</strong> A saturação pretendida (V2) precisa ser superior à atual do solo (V1).";
+        resultadoBox.innerHTML = "⚠️ Saturação desejada inválida.";
         resultadoBox.classList.remove('hidden');
         return;
     }
 
     const nc = ((v2 - v1) * ctc) / prnt;
-    resultadoBox.innerHTML = `🔬 <strong>Resultado Técnico:</strong> Recomendação de Calagem = <strong>${nc.toFixed(2)} toneladas por hectare (t/ha)</strong>.<br><small>Distribuição uniforme recomendada incorporando de 0 a 20cm de profundidade.</small>`;
+    resultadoBox.innerHTML = `🔬 <strong>Resultado Técnico:</strong> Recomendação = <strong>${nc.toFixed(2)} t/ha</strong>.`;
     resultadoBox.classList.remove('hidden');
-    addLog(`Cálculo de calagem executado: ${nc.toFixed(2)} t/ha.`);
 }
 
-// GESTÃO DE REBANHO
 function renderRebanho() {
     const tbody = document.getElementById('cattle-table-body');
     tbody.innerHTML = "";
-    
     rebanho.forEach((animal, index) => {
         tbody.innerHTML += `
             <tr>
@@ -174,33 +204,21 @@ function adicionarAnimal() {
     const breed = document.getElementById('animal-breed').value;
     const weight = parseFloat(document.getElementById('animal-weight').value);
 
-    if(!id || !weight) {
-        alert("Preencha todos os campos do animal.");
-        return;
-    }
-
+    if(!id || !weight) return;
     rebanho.push({ id, breed, weight });
     renderRebanho();
-    addLog(`Entrada de animal salva: ${id}`);
-
     document.getElementById('animal-id').value = "";
     document.getElementById('animal-weight').value = "";
 }
 
 function removerAnimal(index) {
-    const idRemovido = rebanho[index].id;
     rebanho.splice(index, 1);
     renderRebanho();
-    addLog(`Animal deletado: ${idRemovido}`);
 }
 
-// EXPORTAÇÃO DE RELATÓRIO
 function exportarParaCSV() {
     let csvContent = "data:text/csv;charset=utf-8,Identificador,Raca,Peso(kg)\n";
-    rebanho.forEach(animal => {
-        csvContent += `${animal.id},${animal.breed},${animal.weight}\n`;
-    });
-    
+    rebanho.forEach(animal => { csvContent += `${animal.id},${animal.breed},${animal.weight}\n`; });
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -208,11 +226,9 @@ function exportarParaCSV() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    addLog("Relatório exportado para planilha Excel/CSV.");
 }
 
 function atualizarClimaFakeReal() {
     const agora = new Date().getHours();
-    let temp = agora > 18 || agora < 6 ? "14°C" : "22°C"; // Temperaturas mais próximas do clima de SJP-PR
-    document.querySelector('.weather-temp').innerText = temp;
+    document.querySelector('.weather-temp').innerText = agora > 18 || agora < 6 ? "14°C" : "22°C";
 }
